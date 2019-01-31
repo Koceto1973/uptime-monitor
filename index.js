@@ -78,7 +78,7 @@ var unifiedServer = function(req,res){
       };
 
       // Route the request to the handler specified in the router
-      chosenHandler(data,function(statusCode,payload){
+      chosenHandler(data,function(statusCode,payload){ // function is callback, gets args from specific handler by callback(code, payload)
 
         // Use the status code returned from the handler, or set the default status code to 200
         statusCode = typeof(statusCode) == 'number' ? statusCode : 200;
