@@ -107,7 +107,6 @@ var router = {
   'checks' : handlers.checks,
 };
 
-
 // sms feature test
 // helpers.sendTwilioSms('xxxxxxxxx','hello', (err) => {
 //   console.log(err);
