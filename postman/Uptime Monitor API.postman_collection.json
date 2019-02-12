@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "aedf7f97-c8dd-4b4f-94b8-6c5f4a1d839c",
+		"_postman_id": "5be751cd-e8b3-48e6-a249-6d510ff248cb",
 		"name": "Uptime Monitor API",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -99,7 +99,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n\t\"firstName\": \"John\",  \n\t\"lastName\": \"Smith\",\n\t\"phone\": \"0123456789\",\n\t\"password\": \"johnsmithspassword\",\n\t\"tosAgreement\":true\n}"
+					"raw": "{\n\t\"firstName\": \"John\",  \n\t\"lastName\": \"Smith\",\n\t\"phone\": \"123456789\",\n\t\"password\": \"johnsmithspassword\",\n\t\"tosAgreement\":true\n}"
 				},
 				"url": {
 					"raw": "{{url.https}}/users",
@@ -154,7 +154,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n\t\"firstName\": \"Marry\",\n\t\"lastName\": \"Ann\",\n\t\"phone\": \"7123456789\",\n\t\"password\": \"marryannspassword\",\n\t\"tosAgreement\":true\n}"
+					"raw": "{\n\t\"firstName\": \"Marry\",\n\t\"lastName\": \"Ann\",\n\t\"phone\": \"123456780\",\n\t\"password\": \"marryannspassword\",\n\t\"tosAgreement\":true\n}"
 				},
 				"url": {
 					"raw": "{{url.https}}/users",
@@ -234,7 +234,7 @@
 						"value": "application/json"
 					},
 					{
-						"key": "tokenId",
+						"key": "token",
 						"value": "{{tokenId}}",
 						"type": "text"
 					}
@@ -264,6 +264,11 @@
 						"key": "Content-Type",
 						"type": "text",
 						"value": "application/json"
+					},
+					{
+						"key": "token",
+						"value": "{{tokenId}}",
+						"type": "text"
 					}
 				],
 				"body": {
@@ -526,7 +531,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n\t\"protocol\": \"http\",\n\t\"url\": \"google.com\",\n\t\"method\": \"get\",\n\t\"successCodes\": [200,201],\n\t\"timeoutSeconds\": 3\n}"
+					"raw": "{\n\t\"protocol\": \"http\",\n\t\"url\": \"yahoo.com\",\n\t\"method\": \"get\",\n\t\"successCodes\": [200,201,301,302],\n\t\"timeoutSeconds\": 3\n}"
 				},
 				"url": {
 					"raw": "{{url.https}}/checks",
