@@ -1,15 +1,7 @@
-/*
- * Frontend Logic for application
- *
- */
+// Frontend Logic for application
 
 // Container for frontend application
 var app = {};
-
-// Config
-app.config = {
-  'sessionToken' : false
-};
 
 // AJAX Client (for RESTful API)
 app.client = {}
@@ -43,7 +35,7 @@ app.client.request = function(headers,path,method,queryStringObject,payload,call
   // Form the http request as a JSON type
   var xhr = new XMLHttpRequest();
   xhr.open(method, requestUrl, true);
-  xhr.setRequestHeader("Content-type", "application/json");
+  xhr.setRequestHeader("Content-type", "application/json"); // front end asking it's back end
 
   // For each header sent, add it to the request
   for(var headerKey in headers){
@@ -82,51 +74,12 @@ app.client.request = function(headers,path,method,queryStringObject,payload,call
 
 };
 
-// Bind the logout button
-app.bindLogoutButton = function(){
-  document.getElementById("logoutButton").addEventListener("click", function(e){
-
-    // Stop it from redirecting anywhere
-    e.preventDefault();
-
-    // Log the user out
-    app.logUserOut();
-
-  });
-};
-
-// Log the user out then redirect them
-app.logUserOut = function(redirectUser){
-  // Set redirectUser to default to true
-  redirectUser = typeof(redirectUser) == 'boolean' ? redirectUser : true;
-
-  // Get the current token id
-  var tokenId = typeof(app.config.sessionToken.id) == 'string' ? app.config.sessionToken.id : false;
-
-  // Send the current token to the tokens endpoint to delete it
-  var queryStringObject = {
-    'id' : tokenId
-  };
-  app.client.request(undefined,'api/tokens','DELETE',queryStringObject,undefined,function(statusCode,responsePayload){
-    // Set the app.config token as false
-    app.setSessionToken(false);
-
-    // Send the user to the logged out page
-    if(redirectUser){
-      window.location = '/session/deleted';
-    }
-
-  });
-};
-
 // Bind the forms
 app.bindForms = function(){
-  if(document.querySelector("form")){
-
-    var allForms = document.querySelectorAll("form");
-    for(var i = 0; i < allForms.length; i++){
-        allForms[i].addEventListener("submit", function(e){
-
+  if(document.querySelector("form")){ // if there are forms on the page
+    var allForms = document.querySelectorAll("form"); // get them
+    for(var i = 0; i < allForms.length; i++){ // and for each form
+        allForms[i].addEventListener("submit", function(e){ // on submition
         // Stop it from submitting
         e.preventDefault();
         var formId = this.id;
@@ -141,16 +94,17 @@ app.bindForms = function(){
           document.querySelector("#"+formId+" .formSuccess").style.display = 'none';
         }
 
-
         // Turn the inputs into a payload
         var payload = {};
         var elements = this.elements;
         for(var i = 0; i < elements.length; i++){
-          if(elements[i].type !== 'submit'){
-            // Determine class of element and set value accordingly
+          if(elements[i].type !== 'submit'){ // do not count the submit button
+            // Determine class of element
             var classOfElement = typeof(elements[i].classList.value) == 'string' && elements[i].classList.value.length > 0 ? elements[i].classList.value : '';
+            // Set proper value
             var valueOfElement = elements[i].type == 'checkbox' && classOfElement.indexOf('multiselect') == -1 ? elements[i].checked : classOfElement.indexOf('intval') == -1 ? elements[i].value : parseInt(elements[i].value);
             var elementIsChecked = elements[i].checked;
+            
             // Override the method of the form if the input's name is _method
             var nameOfElement = elements[i].name;
             if(nameOfElement == '_method'){
@@ -160,6 +114,7 @@ app.bindForms = function(){
               if(nameOfElement == 'httpmethod'){
                 nameOfElement = 'method';
               }
+
               // Create an payload field named "id" if the elements name is actually uid
               if(nameOfElement == 'uid'){
                 nameOfElement = 'id';
@@ -171,23 +126,22 @@ app.bindForms = function(){
                   payload[nameOfElement].push(valueOfElement);
                 }
               } else {
-                payload[nameOfElement] = valueOfElement;
+                payload[nameOfElement] = valueOfElement; // add the current element to the payload
               }
 
             }
           }
         }
 
-
         // If the method is DELETE, the payload should be a queryStringObject instead
         var queryStringObject = method == 'DELETE' ? payload : {};
 
-        // Call the API
+        // Call the API, on success app.formResponseProcessor(formId,payload,responsePayload);
         app.client.request(undefined,path,method,queryStringObject,payload,function(statusCode,responsePayload){
           // Display an error on the form if needed
           if(statusCode !== 200){
 
-            if(statusCode == 403){
+            if(statusCode == 403){ // forbidden
               // log the user out
               app.logUserOut();
 
@@ -211,6 +165,19 @@ app.bindForms = function(){
       });
     }
   }
+};
+
+// Bind the logout button, adding the click event listener to trigger app.logUserOut()
+app.bindLogoutButton = function(){
+  document.getElementById("logoutButton").addEventListener("click", function(e){
+
+    // Stop it from redirecting anywhere
+    e.preventDefault();
+
+    // Log the user out
+    app.logUserOut();
+
+  });
 };
 
 // Form response processor
@@ -241,6 +208,7 @@ app.formResponseProcessor = function(formId,requestPayload,responsePayload){
       }
     });
   }
+
   // If login was successful, set the token in localstorage and redirect the user
   if(formId == 'sessionCreate'){
     app.setSessionToken(responsePayload);
@@ -271,7 +239,7 @@ app.formResponseProcessor = function(formId,requestPayload,responsePayload){
 
 };
 
-// Get the session token from localstorage and set it in the app.config object
+// Get the session token from localstorage and set it in the app.config object and in html body class
 app.getSessionToken = function(){
   var tokenString = localStorage.getItem('token');
   if(typeof(tokenString) == 'string'){
@@ -290,40 +258,36 @@ app.getSessionToken = function(){
   }
 };
 
-// Set (or remove) the loggedIn class from the body
-app.setLoggedInClass = function(add){
-  var target = document.querySelector("body");
-  if(add){
-    target.classList.add('loggedIn');
-  } else {
-    target.classList.remove('loggedIn');
-  }
+// container for sessionToken
+app.config = {
+  'sessionToken' : false
 };
 
-// Set the session token in the app.config object as well as localstorage
-app.setSessionToken = function(token){
-  app.config.sessionToken = token;
-  var tokenString = JSON.stringify(token);
-  localStorage.setItem('token',tokenString);
-  if(typeof(token) == 'object'){
-    app.setLoggedInClass(true);
-  } else {
-    app.setLoggedInClass(false);
-  }
+// Loop app.renewToken() each minute to renew token ( extend it )
+app.tokenRenewalLoop = function(){
+  setInterval(function(){
+    app.renewToken(function(err){
+      if(!err){
+        console.log("Token renewed successfully @ "+Date.now());
+      }
+    });
+  },1000 * 60);
 };
 
-// Renew the token
+// Renew the token ( extend it )
 app.renewToken = function(callback){
+  // get the current token if any
   var currentToken = typeof(app.config.sessionToken) == 'object' ? app.config.sessionToken : false;
-  if(currentToken){
-    // Update the token with a new expiration
+  if(currentToken){ // if token exist, update the token with a new expiration
+    // build payload to ask api for token extension
     var payload = {
       'id' : currentToken.id,
       'extend' : true,
     };
+    // ask the api to extend the token
     app.client.request(undefined,'api/tokens','PUT',undefined,payload,function(statusCode,responsePayload){
       // Display an error on the form if needed
-      if(statusCode == 200){
+      if(statusCode == 200){ // if token is extended
         // Get the new token details
         var queryStringObject = {'id' : currentToken.id};
         app.client.request(undefined,'api/tokens','GET',queryStringObject,undefined,function(statusCode,responsePayload){
@@ -347,7 +311,29 @@ app.renewToken = function(callback){
   }
 };
 
-// Load data on the page
+// Set the session token ( or false ) in the app.config object as well as localstorage and html body class loggedIn by app.setLoggedInClass()
+app.setSessionToken = function(token){
+  app.config.sessionToken = token;
+  var tokenString = JSON.stringify(token);
+  localStorage.setItem('token',tokenString);
+  if(typeof(token) == 'object'){
+    app.setLoggedInClass(true);
+  } else {
+    app.setLoggedInClass(false);
+  }
+};
+
+// Set (or remove) the loggedIn class from the html body
+app.setLoggedInClass = function(add){
+  var target = document.querySelector("body");
+  if(add){
+    target.classList.add('loggedIn');
+  } else {
+    target.classList.remove('loggedIn');
+  }
+};
+
+// Load respectful data on the page ( accountEdit, checksList, checksEdit ) checking body primary class 
 app.loadDataOnPage = function(){
   // Get the current page from the body class
   var bodyClasses = document.querySelector("body").classList;
@@ -369,7 +355,7 @@ app.loadDataOnPage = function(){
   }
 };
 
-// Load the account edit page specifically
+// Load the account edit page when needed
 app.loadAccountEditPage = function(){
   // Get the phone number from the current token, or log the user out if none is there
   var phone = typeof(app.config.sessionToken.phone) == 'string' ? app.config.sessionToken.phone : false;
@@ -392,7 +378,8 @@ app.loadAccountEditPage = function(){
         }
 
       } else {
-        // If the request comes back as something other than 200, log the user our (on the assumption that the api is temporarily down or the users token is bad)
+        // If the request comes back as something other than 200, log the user out 
+        // (on the assumption that the api is temporarily down or the users token is bad)
         app.logUserOut();
       }
     });
@@ -401,7 +388,7 @@ app.loadAccountEditPage = function(){
   }
 };
 
-// Load the dashboard page specifically
+// Load the dashboard page when needed
 app.loadChecksListPage = function(){
   // Get the phone number from the current token, or log the user out if none is there
   var phone = typeof(app.config.sessionToken.phone) == 'string' ? app.config.sessionToken.phone : false;
@@ -471,7 +458,7 @@ app.loadChecksListPage = function(){
 };
 
 
-// Load the checks edit page specifically
+// Load the checks edit page when needed
 app.loadChecksEditPage = function(){
   // Get the check id from the query string, if none is found then redirect back to dashboard
   var id = typeof(window.location.href.split('=')[1]) == 'string' && window.location.href.split('=')[1].length > 0 ? window.location.href.split('=')[1] : false;
@@ -512,15 +499,28 @@ app.loadChecksEditPage = function(){
   }
 };
 
-// Loop to renew token often
-app.tokenRenewalLoop = function(){
-  setInterval(function(){
-    app.renewToken(function(err){
-      if(!err){
-        console.log("Token renewed successfully @ "+Date.now());
-      }
-    });
-  },1000 * 60);
+// Log the user out then redirect them
+app.logUserOut = function(redirectUser){
+  // Set redirectUser default to true
+  redirectUser = typeof(redirectUser) == 'boolean' ? redirectUser : true;
+
+  // Get the current token id
+  var tokenId = typeof(app.config.sessionToken.id) == 'string' ? app.config.sessionToken.id : false;
+
+  // Send the current token to the tokens endpoint to delete it
+  var queryStringObject = {
+    'id' : tokenId
+  };
+  app.client.request(undefined,'api/tokens','DELETE',queryStringObject,undefined,function(statusCode,responsePayload){
+    // Set the app.config token as false
+    app.setSessionToken(false);
+
+    // Send the user to the logged out page
+    if(redirectUser){
+      window.location = '/session/deleted';
+    }
+
+  });
 };
 
 // Init (bootstrapping)
@@ -529,16 +529,16 @@ app.init = function(){
   // Bind all form submissions
   app.bindForms();
 
-  // Bind logout logout button
+  // Bind the logout button, adding the click event listener to trigger app.logUserOut()
   app.bindLogoutButton();
 
-  // Get the token from localstorage
+  // Get the session token from localstorage and set it in the app.config object and in html body class
   app.getSessionToken();
 
-  // Renew token
+  // Loop app.renewToken() each minute to renew token ( extend it )
   app.tokenRenewalLoop();
 
-  // Load data on page
+  // Load respectful data on the page ( accountEdit, checksList, checksEdit ) checking body primary class 
   app.loadDataOnPage();
 
 };
