@@ -21,7 +21,7 @@ app.init = function(){
   setTimeout(function(){
     cli.init();
   },50);
-
+  
 };
 
 // Self executing
@@ -29,3 +29,4 @@ app.init();
 
 // Export the app, usefull for testing later on
 module.exports = app;
+
