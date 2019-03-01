@@ -3,39 +3,18 @@
  *
  */
 
-// Dependencies
-var helpers = require('./../lib/helpers.js');
-var assert = require('assert');
+ // Override the NODE_ENV variable
+ process.env.NODE_ENV = 'testing';
 
 // Application logic for the test runner
 _app = {};
 
 // Holder of all tests
-_app.tests = {
-  'unit' : {}
-};
+_app.tests = {};
 
-// Assert that the getANumber function is returning a number
-_app.tests.unit['helpers.getANumber should return a number'] = function(done){
-  var val = helpers.getANumber();
-  assert.equal(typeof(val), 'number');
-  done();
-};
-
-
-// Assert that the getANumber function is returning 1
-_app.tests.unit['helpers.getANumber should return 1'] = function(done){
-  var val = helpers.getANumber();
-  assert.equal(val, 1);
-  done();
-};
-
-// Assert that the getANumber function is returning 2
-_app.tests.unit['helpers.getNumberOne should return 2'] = function(done){
-  var val = helpers.getANumber();
-  assert.equal(val, 2);
-  done();
-};
+// Dependencies
+_app.tests.unit = require('./unit');
+_app.tests.api = require('./api');
 
 // Count all the tests
 _app.countTests = function(){
@@ -59,7 +38,7 @@ _app.runTests = function(){
   var successes = 0;
   var limit = _app.countTests();
   var counter = 0;
-  for(var key in _app.tests){  // unit ...
+  for(var key in _app.tests){
      if(_app.tests.hasOwnProperty(key)){
        var subTests = _app.tests[key];
        for(var testName in subTests){
@@ -70,6 +49,7 @@ _app.runTests = function(){
               // Call the test
               try{
                 testValue(function(){
+
                   // If it calls back without throwing, then it succeeded, so log it in green
                   console.log('\x1b[32m%s\x1b[0m',tmpTestName);
                   counter++;
@@ -97,6 +77,7 @@ _app.runTests = function(){
   }
 };
 
+
 // Product a test outcome report
 _app.produceTestReport = function(limit,successes,errors){
   console.log("");
@@ -119,10 +100,9 @@ _app.produceTestReport = function(limit,successes,errors){
     console.log("");
     console.log("--------END ERROR DETAILS--------");
   }
-
-
   console.log("");
   console.log("--------END TEST REPORT--------");
+  process.exit(0);
 
 };
 
