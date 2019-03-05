@@ -77,7 +77,6 @@ _app.runTests = function(){
   }
 };
 
-
 // Product a test outcome report
 _app.produceTestReport = function(limit,successes,errors){
   console.log("");
